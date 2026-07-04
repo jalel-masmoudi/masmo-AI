@@ -1,0 +1,23 @@
+# Cloudflare Pages — Masmo frontend
+# Docs: https://developers.cloudflare.com/pages/functions/wrangler-configuration/
+
+name = "masmo"
+compatibility_date = "2024-01-01"
+pages_build_output_dir = "dist"
+
+# Runtime binding for Pages Functions API proxy (functions/_middleware.ts).
+# Override per environment in the Cloudflare dashboard or via wrangler secrets.
+[vars]
+BACKEND_API_URL = "http://127.0.0.1:8000"
+
+[env.preview.vars]
+BACKEND_API_URL = "https://your-staging-api.example.com"
+
+[env.production.vars]
+BACKEND_API_URL = "https://your-production-api.example.com"
+
+# VITE_API_BASE_URL is a *build-time* variable for Vite.
+# Set it in Cloudflare Pages → Settings → Environment variables (Build):
+#   VITE_API_BASE_URL = ""   (empty — use same-origin /api proxy below)
+# Or point directly at your backend:
+#   VITE_API_BASE_URL = "https://your-production-api.example.com"

@@ -1,0 +1,103 @@
+{
+  "employees": [
+    {
+      "id": "EMP-001",
+      "name": "Sarah Jenkins",
+      "role": "Product Manager",
+      "department": "Product",
+      "projects": ["PRJ-PHX"]
+    },
+    {
+      "id": "EMP-002",
+      "name": "David Chen",
+      "role": "Lead DevOps Engineer",
+      "department": "Platform Engineering",
+      "projects": ["PRJ-PHX", "PRJ-INF"]
+    },
+    {
+      "id": "EMP-003",
+      "name": "Alex Rodriguez",
+      "role": "Database Administrator",
+      "department": "Data Infrastructure",
+      "projects": ["PRJ-INF"]
+    }
+  ],
+  "projects": [
+    {
+      "id": "PRJ-PHX",
+      "name": "Project Phoenix",
+      "status": "Delayed",
+      "description": "Next-generation user dashboard overhaul.",
+      "dependencies": ["SYS-REDIS-01"],
+      "owner_id": "EMP-001"
+    },
+    {
+      "id": "PRJ-INF",
+      "name": "Infrastructure Q3 Scaling",
+      "status": "In Progress",
+      "description": "Scaling up data layer to support Q3 traffic.",
+      "dependencies": [],
+      "owner_id": "EMP-002"
+    }
+  ],
+  "tickets": [
+    {
+      "id": "PROJ-101",
+      "title": "Deploy new caching layer for Phoenix",
+      "type": "Task",
+      "status": "Blocked",
+      "assignee_id": "EMP-002",
+      "project_id": "PRJ-PHX",
+      "blocks": [],
+      "blocked_by": ["OPS-402"]
+    },
+    {
+      "id": "OPS-402",
+      "title": "Redis cluster memory leak instability",
+      "type": "Bug",
+      "status": "In Progress",
+      "assignee_id": "EMP-003",
+      "project_id": "PRJ-INF",
+      "blocks": ["PROJ-101"],
+      "blocked_by": []
+    }
+  ],
+  "incidents": [
+    {
+      "id": "INC-9921",
+      "title": "Redis Cluster OOM (Out of Memory) crashes",
+      "severity": "SEV-2",
+      "status": "Investigating",
+      "affected_systems": ["SYS-REDIS-01"],
+      "lead_responder_id": "EMP-003",
+      "timeline": [
+        "2026-07-03T08:00:00Z - Alert triggered: Memory usage > 95%",
+        "2026-07-03T08:15:00Z - Pods crashing and restarting",
+        "2026-07-03T09:00:00Z - Alex assigned to investigate"
+      ]
+    }
+  ],
+  "documents": [
+    {
+      "id": "DOC-ADR-045",
+      "title": "ADR 045: Project Phoenix Caching Strategy",
+      "author_id": "EMP-002",
+      "content": "Project Phoenix requires Redis v7 to utilize the new JSON querying capabilities. The legacy Redis v6 cluster cannot be used. We must deploy a new v7 cluster (SYS-REDIS-01) before Phoenix can launch."
+    },
+    {
+      "id": "DOC-RC-9921",
+      "title": "Draft Root Cause: INC-9921",
+      "author_id": "EMP-003",
+      "content": "Initial findings for the Redis v7 cluster crashes indicate a misconfiguration in the maxmemory-policy combined with a known memory leak in the specific minor version we deployed. Vendor patch is required. ETA 2 weeks."
+    }
+  ],
+  "systems": [
+    {
+      "id": "SYS-REDIS-01",
+      "name": "Phoenix Production Redis",
+      "version": "7.0.12",
+      "status": "Degraded",
+      "vendor": "Vultr Managed Databases"
+    }
+  ]
+}

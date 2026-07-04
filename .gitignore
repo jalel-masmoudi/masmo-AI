@@ -1,0 +1,33 @@
+# Environment — never commit secrets
+.env
+.env.*
+!.env.example
+!**/.env.example
+.env.local
+.env.*.local
+backend/.env
+frontend/.env
+frontend/.env.production
+
+# Python
+backend/venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+
+# Node
+frontend/node_modules/
+frontend/dist/
+
+# IDE / OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Internal / presenter-only (keep local, not in public repo)
+demo_script.md

@@ -1,0 +1,247 @@
+{
+  "meta": {
+    "company": "Nexora Systems",
+    "dataset_version": "1.1",
+    "last_updated": "2026-03-15"
+  },
+  "employees": [
+    {
+      "id": "employee_sarah",
+      "name": "Sarah Chen",
+      "role": "Product Manager",
+      "department": "Platform",
+      "email": "sarah.chen@nexora.io"
+    },
+    {
+      "id": "employee_david",
+      "name": "David Okonkwo",
+      "role": "Lead DevOps Engineer",
+      "department": "Infrastructure",
+      "email": "david.okonkwo@nexora.io"
+    },
+    {
+      "id": "employee_alex",
+      "name": "Alex Rivera",
+      "role": "Database Administrator",
+      "department": "Data Platform",
+      "email": "alex.rivera@nexora.io"
+    },
+    {
+      "id": "employee_maya",
+      "name": "Maya Patel",
+      "role": "Engineering Manager",
+      "department": "Platform",
+      "email": "maya.patel@nexora.io"
+    },
+    {
+      "id": "employee_james",
+      "name": "James Liu",
+      "role": "Senior Backend Engineer",
+      "department": "Platform",
+      "email": "james.liu@nexora.io"
+    }
+  ],
+  "systems": [
+    {
+      "id": "SYS-REDIS-01",
+      "name": "Production Redis Cluster",
+      "status": "degraded",
+      "environment": "production",
+      "version": "6.2.14",
+      "owner_id": "employee_david"
+    },
+    {
+      "id": "SYS-API-GW-01",
+      "name": "API Gateway",
+      "status": "healthy",
+      "environment": "production",
+      "version": "2.4.1",
+      "owner_id": "employee_james"
+    },
+    {
+      "id": "SYS-PHOENIX-API-01",
+      "name": "Phoenix API Service",
+      "status": "blocked",
+      "environment": "staging",
+      "version": "0.9.3",
+      "owner_id": "employee_james",
+      "depends_on_system_ids": ["SYS-REDIS-01"]
+    }
+  ],
+  "vendors": [
+    {
+      "id": "vendor_redis_labs",
+      "name": "Redis Labs",
+      "contract_id": "VND-2024-118",
+      "support_tier": "Enterprise",
+      "contact": "support@redis.com"
+    }
+  ],
+  "projects": [
+    {
+      "id": "project_phoenix",
+      "name": "Project Phoenix",
+      "description": "Next-generation customer analytics platform with real-time event processing.",
+      "status": "delayed",
+      "target_launch": "2026-04-30",
+      "revised_launch": "2026-06-15",
+      "pm_id": "employee_sarah",
+      "engineering_lead_id": "employee_james",
+      "depends_on_system_ids": ["SYS-REDIS-01", "SYS-API-GW-01"],
+      "blocked_by_ticket_ids": ["PROJ-101", "OPS-402"],
+      "related_incident_ids": ["INC-2024-089"]
+    },
+    {
+      "id": "project_cache_migration",
+      "name": "Redis v7 Migration",
+      "description": "Upgrade production caching layer from Redis 6.2 to Redis 7.x.",
+      "status": "in_progress",
+      "target_launch": "2026-03-01",
+      "pm_id": "employee_maya",
+      "engineering_lead_id": "employee_david",
+      "depends_on_system_ids": ["SYS-REDIS-01"],
+      "blocked_by_ticket_ids": ["OPS-402"],
+      "related_incident_ids": ["INC-2024-089"]
+    }
+  ],
+  "tickets": [
+    {
+      "id": "PROJ-101",
+      "title": "Deploy new caching layer for Phoenix",
+      "type": "story",
+      "status": "blocked",
+      "priority": "P1",
+      "assignee_id": "employee_james",
+      "reporter_id": "employee_sarah",
+      "project_id": "project_phoenix",
+      "system_id": "SYS-REDIS-01",
+      "blocked_by_ticket_ids": ["OPS-402"],
+      "description": "Implement Redis-backed session cache and event deduplication for Phoenix API. Blocked until Redis cluster stability is restored.",
+      "created_at": "2026-02-10",
+      "updated_at": "2026-03-12"
+    },
+    {
+      "id": "OPS-402",
+      "title": "Redis cluster instability — memory eviction storms",
+      "type": "bug",
+      "status": "in_progress",
+      "priority": "P0",
+      "assignee_id": "employee_david",
+      "reporter_id": "employee_alex",
+      "project_id": "project_cache_migration",
+      "system_id": "SYS-REDIS-01",
+      "related_incident_ids": ["INC-2024-089"],
+      "description": "Production Redis cluster experiencing repeated OOM evictions and elevated latency (p99 > 450ms). Suspected misconfigured maxmemory-policy after partial upgrade.",
+      "created_at": "2026-03-08",
+      "updated_at": "2026-03-14"
+    },
+    {
+      "id": "DATA-215",
+      "title": "Validate Redis persistence settings for Phoenix workloads",
+      "type": "task",
+      "status": "open",
+      "priority": "P2",
+      "assignee_id": "employee_alex",
+      "reporter_id": "employee_david",
+      "project_id": "project_phoenix",
+      "system_id": "SYS-REDIS-01",
+      "description": "Review AOF/RDB settings and failover behavior for Phoenix high-write event streams.",
+      "created_at": "2026-03-11",
+      "updated_at": "2026-03-11"
+    },
+    {
+      "id": "PROJ-118",
+      "title": "Phoenix API integration tests against staging cache",
+      "type": "story",
+      "status": "blocked",
+      "priority": "P1",
+      "assignee_id": "employee_james",
+      "reporter_id": "employee_sarah",
+      "project_id": "project_phoenix",
+      "system_id": "SYS-PHOENIX-API-01",
+      "blocked_by_ticket_ids": ["PROJ-101"],
+      "description": "End-to-end tests for Phoenix event pipeline. Cannot proceed until PROJ-101 caching layer is deployed.",
+      "created_at": "2026-02-28",
+      "updated_at": "2026-03-13"
+    }
+  ],
+  "incidents": [
+    {
+      "id": "INC-2024-089",
+      "title": "Redis cluster degraded — elevated latency and eviction storms",
+      "severity": "SEV-2",
+      "status": "investigating",
+      "system_id": "SYS-REDIS-01",
+      "commander_id": "employee_david",
+      "responder_ids": ["employee_david", "employee_alex"],
+      "related_ticket_ids": ["OPS-402"],
+      "affected_project_ids": ["project_phoenix", "project_cache_migration"],
+      "vendor_id": "vendor_redis_labs",
+      "summary": "At 03:42 UTC, monitoring alerted on Redis p99 latency spike and key eviction rate 12x baseline. Phoenix staging deployments paused. Root cause under investigation — possible version mismatch between primary and replica nodes.",
+      "started_at": "2026-03-08T03:42:00Z",
+      "updated_at": "2026-03-14T18:20:00Z",
+      "timeline": [
+        {
+          "at": "2026-03-08T03:42:00Z",
+          "event": "SEV-2 declared — Redis p99 latency spike detected"
+        },
+        {
+          "at": "2026-03-08T04:15:00Z",
+          "event": "Key eviction rate reached 12x baseline; Phoenix staging deployments paused"
+        },
+        {
+          "at": "2026-03-10T09:30:00Z",
+          "event": "OPS-402 opened; David assigned as incident commander"
+        },
+        {
+          "at": "2026-03-14T18:20:00Z",
+          "event": "Root cause identified: Redis 6.2/7.0 version skew on replica nodes"
+        }
+      ]
+    }
+  ],
+  "documents": [
+    {
+      "id": "doc_phoenix_arch",
+      "title": "Project Phoenix Architecture Overview",
+      "type": "confluence",
+      "author_id": "employee_sarah",
+      "project_id": "project_phoenix",
+      "system_ids": ["SYS-REDIS-01", "SYS-PHOENIX-API-01"],
+      "content": "Project Phoenix requires Redis v7 for stream processing and client-side caching. The platform depends on sub-50ms cache reads for real-time analytics dashboards. Launch is contingent on Redis v7 migration completing in production.",
+      "url": "https://confluence.nexora.io/display/PLAT/Phoenix+Architecture",
+      "updated_at": "2026-01-22"
+    },
+    {
+      "id": "doc_redis_runbook",
+      "title": "Redis Production Runbook",
+      "type": "confluence",
+      "author_id": "employee_david",
+      "system_ids": ["SYS-REDIS-01"],
+      "content": "Production Redis cluster runs Redis 6.2.14 across 3 primary + 3 replica nodes. Maxmemory-policy must be allkeys-lru. Any version skew between nodes triggers automatic failover — documented SEV-2 procedure applies.",
+      "url": "https://confluence.nexora.io/display/OPS/Redis+Runbook",
+      "updated_at": "2025-11-05"
+    },
+    {
+      "id": "doc_incident_postmortem_draft",
+      "title": "INC-2024-089 — Initial Findings (Draft)",
+      "type": "confluence",
+      "author_id": "employee_alex",
+      "project_id": "project_phoenix",
+      "incident_id": "INC-2024-089",
+      "content": "Preliminary analysis: one replica node was upgraded to Redis 7.0 during a maintenance window while primaries remain on 6.2.14. Replication protocol incompatibility caused intermittent sync failures and memory pressure. Phoenix PROJ-101 deployment blocked until cluster is homogenized.",
+      "url": "https://confluence.nexora.io/display/OPS/INC-2024-089-Draft",
+      "updated_at": "2026-03-14"
+    },
+    {
+      "id": "doc_vendor_sla",
+      "title": "Redis Labs Enterprise SLA",
+      "type": "contract",
+      "author_id": "employee_maya",
+      "vendor_id": "vendor_redis_labs",
+      "content": "Enterprise support guarantees 1-hour response for SEV-2 incidents. Vendor recommends homogeneous Redis 7.x across all nodes before enabling Phoenix workload patterns.",
+      "url": "https://contracts.nexora.io/vendors/VND-2024-118",
+      "updated_at": "2024-09-01"
+    }
+  ]
+}
