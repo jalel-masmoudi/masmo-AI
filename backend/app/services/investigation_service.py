@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import threading
 import uuid
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 from typing import Any, Literal
 
 from app.agents.state import InvestigationState, initial_state
@@ -19,7 +19,7 @@ class InvestigationRecord:
         self.state: InvestigationState = initial_state(question)
         self.events: list[dict[str, Any]] = []
         self.error: str | None = None
-        self.created_at = datetime.now(UTC).isoformat()
+        self.created_at = datetime.now(timezone.utc).isoformat()
         self.updated_at = self.created_at
 
 
@@ -40,7 +40,7 @@ class InvestigationStore:
             return self._records.get(investigation_id)
 
     def _append_event(self, record: InvestigationRecord, event: dict[str, Any]) -> None:
-        event["timestamp"] = datetime.now(UTC).isoformat()
+        event["timestamp"] = datetime.now(timezone.utc).isoformat()
         record.events.append(event)
         record.updated_at = event["timestamp"]
 
@@ -109,7 +109,7 @@ class InvestigationStore:
             record = self._records[investigation_id]
             record.state = state
             self._events_from_state(record, state)
-            record.updated_at = datetime.now(UTC).isoformat()
+            record.updated_at = datetime.now(timezone.utc).isoformat()
 
     def set_status(
         self,
@@ -121,7 +121,7 @@ class InvestigationStore:
             record = self._records[investigation_id]
             record.status = status
             record.error = error
-            record.updated_at = datetime.now(UTC).isoformat()
+            record.updated_at = datetime.now(timezone.utc).isoformat()
 
 
 investigation_store = InvestigationStore()
