@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import ReactFlow, { Background, Controls, MiniMap } from 'reactflow'
 import 'reactflow/dist/style.css'
 import { getGraph } from '../services/api'
@@ -23,6 +23,32 @@ export function GraphViewer({
 }: GraphViewerProps) {
   const [graphState, setGraphState] = useState<GraphState>(emptyGraph)
   const [error, setError] = useState<string | null>(null)
+  const [isFullscreen, setIsFullscreen] = useState(false)
+  const containerRef = useRef<HTMLElement>(null)
+
+  useEffect(() => {
+    const onFullscreenChange = () => {
+      setIsFullscreen(document.fullscreenElement === containerRef.current)
+    }
+
+    document.addEventListener('fullscreenchange', onFullscreenChange)
+    return () => document.removeEventListener('fullscreenchange', onFullscreenChange)
+  }, [])
+
+  const toggleFullscreen = async () => {
+    const container = containerRef.current
+    if (!container) return
+
+    try {
+      if (document.fullscreenElement === container) {
+        await document.exitFullscreen()
+      } else {
+        await container.requestFullscreen()
+      }
+    } catch {
+      // Fullscreen may be blocked by browser policy.
+    }
+  }
 
   useEffect(() => {
     if (!investigationId) {
@@ -62,8 +88,13 @@ export function GraphViewer({
   const { nodes, edges } = useMemo(() => mapGraphToFlow(graphState), [graphState])
 
   return (
-    <section className="flex h-full min-h-[560px] flex-col rounded-2xl border border-white/10 bg-white/5 p-5 backdrop-blur-sm">
-      <header className="mb-4 flex items-center justify-between">
+    <section
+      ref={containerRef}
+      className={`flex h-full min-h-[560px] flex-col rounded-2xl border border-white/10 bg-white/5 p-5 backdrop-blur-sm ${
+        isFullscreen ? 'bg-slate-950' : ''
+      }`}
+    >
+      <header className="mb-4 flex items-center justify-between gap-3">
         <div>
           <h2 className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-400">
             Knowledge Graph
@@ -72,13 +103,29 @@ export function GraphViewer({
             Enterprise dependencies discovered during investigation
           </p>
         </div>
-        <div className="text-right text-xs text-slate-500">
-          <p>{graphState.nodes.length} nodes</p>
-          <p>{graphState.edges.length} edges</p>
+        <div className="flex items-start gap-3">
+          <div className="text-right text-xs text-slate-500">
+            <p>{graphState.nodes.length} nodes</p>
+            <p>{graphState.edges.length} edges</p>
+          </div>
+          {nodes.length > 0 && (
+            <button
+              type="button"
+              onClick={() => void toggleFullscreen()}
+              className="rounded-xl border border-white/10 bg-slate-900/80 px-3 py-2 text-xs font-semibold text-slate-200 transition hover:border-sky-500/40 hover:text-sky-200"
+              aria-label={isFullscreen ? 'Exit full screen graph' : 'View graph full screen'}
+            >
+              {isFullscreen ? 'Exit full screen' : 'Full screen'}
+            </button>
+          )}
         </div>
       </header>
 
-      <div className="relative min-h-0 flex-1 overflow-hidden rounded-xl border border-white/10 bg-slate-950/80">
+      <div
+        className={`relative min-h-0 flex-1 overflow-hidden rounded-xl border border-white/10 bg-slate-950/80 ${
+          isFullscreen ? 'min-h-[calc(100vh-10rem)]' : ''
+        }`}
+      >
         {error ? (
           <div className="flex h-full items-center justify-center px-6 text-sm text-rose-300">
             {error}
