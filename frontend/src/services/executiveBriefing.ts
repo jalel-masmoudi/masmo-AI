@@ -6,6 +6,7 @@ const isDev = import.meta.env.DEV
 
 let currentAudio: HTMLAudioElement | null = null
 let currentObjectUrl: string | null = null
+let currentRequestId = 0
 
 export interface BriefingCallbacks {
   onStart?: () => void
@@ -33,6 +34,7 @@ function cleanupAudio() {
 function playBrowserTts(
   script: string,
   callbacks?: BriefingCallbacks,
+  requestId?: number,
 ): boolean {
   if (!('speechSynthesis' in window)) {
     return false
@@ -40,18 +42,32 @@ function playBrowserTts(
 
   window.speechSynthesis.cancel()
 
+  if (requestId !== undefined && requestId !== currentRequestId) {
+    return true
+  }
+
   const utterance = new SpeechSynthesisUtterance(script)
   utterance.rate = 0.92
   utterance.pitch = 1
-  utterance.onstart = () => callbacks?.onStart?.()
+  utterance.onstart = () => {
+    if (requestId === undefined || requestId === currentRequestId) {
+      callbacks?.onStart?.()
+    } else {
+      window.speechSynthesis.cancel()
+    }
+  }
   utterance.onend = () => {
-    logGradiumEvent('executive_briefing_completed', { provider: 'browser-tts' })
-    callbacks?.onEnd?.()
+    if (requestId === undefined || requestId === currentRequestId) {
+      logGradiumEvent('executive_briefing_completed', { provider: 'browser-tts' })
+      callbacks?.onEnd?.()
+    }
   }
   utterance.onerror = () => {
-    const message = 'Speech synthesis failed.'
-    logGradiumEvent('executive_briefing_error', { message })
-    callbacks?.onError?.(message)
+    if (requestId === undefined || requestId === currentRequestId) {
+      const message = 'Speech synthesis failed.'
+      logGradiumEvent('executive_briefing_error', { message })
+      callbacks?.onError?.(message)
+    }
   }
 
   window.speechSynthesis.resume()
@@ -64,45 +80,72 @@ export async function playExecutiveBriefing(
   language: VoiceLanguageCode = 'en',
   callbacks?: BriefingCallbacks,
 ): Promise<void> {
+  const requestId = ++currentRequestId
   const script = buildBriefingScript(report, language)
 
   logGradiumEvent('executive_briefing_started', {
     provider: 'gradium',
     language,
     script,
+    requestId,
   })
 
   cleanupAudio()
 
   try {
     const audioBlob = await synthesizeSpeech(script, language)
+    
+    if (requestId !== currentRequestId) {
+      return
+    }
+
     const objectUrl = URL.createObjectURL(audioBlob)
     currentObjectUrl = objectUrl
 
     const audio = new Audio(objectUrl)
     currentAudio = audio
-    audio.onplay = () => callbacks?.onStart?.()
-    audio.onended = () => {
-      logGradiumEvent('executive_briefing_completed', { provider: 'gradium' })
-      cleanupAudio()
-      callbacks?.onEnd?.()
+    
+    audio.onplay = () => {
+      if (requestId === currentRequestId) {
+        callbacks?.onStart?.()
+      } else {
+        audio.pause()
+      }
     }
+    
+    audio.onended = () => {
+      if (requestId === currentRequestId) {
+        logGradiumEvent('executive_briefing_completed', { provider: 'gradium' })
+        cleanupAudio()
+        callbacks?.onEnd?.()
+      }
+    }
+    
     audio.onerror = () => {
       cleanupAudio()
-      if (!playBrowserTts(script, callbacks)) {
+      if (requestId !== currentRequestId) {
+        return
+      }
+      if (!playBrowserTts(script, callbacks, requestId)) {
         const message = 'Gradium playback failed and browser TTS is unavailable.'
         logGradiumEvent('executive_briefing_error', { message })
         callbacks?.onError?.(message)
       }
     }
 
-    await audio.play()
+    if (requestId === currentRequestId) {
+      await audio.play()
+    }
   } catch (error) {
+    if (requestId !== currentRequestId) {
+      return
+    }
+    
     logGradiumEvent('executive_briefing_fallback', {
       reason: error instanceof Error ? error.message : 'unknown',
     })
 
-    if (!playBrowserTts(script, callbacks)) {
+    if (!playBrowserTts(script, callbacks, requestId)) {
       const message =
         error instanceof Error
           ? error.message
@@ -114,6 +157,7 @@ export async function playExecutiveBriefing(
 }
 
 export function stopExecutiveBriefing(callbacks?: Pick<BriefingCallbacks, 'onEnd'>) {
+  currentRequestId++
   cleanupAudio()
   if ('speechSynthesis' in window) {
     window.speechSynthesis.cancel()

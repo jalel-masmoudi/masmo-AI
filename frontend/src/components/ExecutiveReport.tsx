@@ -39,6 +39,7 @@ export function ExecutiveReport({
   visible,
 }: ExecutiveReportProps) {
   const [isSpeaking, setIsSpeaking] = useState(false)
+  const [isAudioLoading, setIsAudioLoading] = useState(false)
   const [language, setLanguage] = useState<VoiceLanguageCode>('en')
   const [translatedMarkdown, setTranslatedMarkdown] = useState<string | null>(null)
   const [isTranslating, setIsTranslating] = useState(false)
@@ -87,6 +88,17 @@ export function ExecutiveReport({
     }
   }, [language, reportMarkdown])
 
+  useEffect(() => {
+    return () => {
+      stopExecutiveBriefing({
+        onEnd: () => {
+          setIsSpeaking(false)
+          setIsAudioLoading(false)
+        },
+      })
+    }
+  }, [language, reportMarkdown])
+
   if (!visible) {
     return null
   }
@@ -94,15 +106,30 @@ export function ExecutiveReport({
   const handlePlayBriefing = () => {
     if (!parsed) return
 
+    setIsAudioLoading(true)
     void playExecutiveBriefing(parsed, language, {
-      onStart: () => setIsSpeaking(true),
-      onEnd: () => setIsSpeaking(false),
-      onError: () => setIsSpeaking(false),
+      onStart: () => {
+        setIsSpeaking(true)
+        setIsAudioLoading(false)
+      },
+      onEnd: () => {
+        setIsSpeaking(false)
+        setIsAudioLoading(false)
+      },
+      onError: () => {
+        setIsSpeaking(false)
+        setIsAudioLoading(false)
+      },
     })
   }
 
   const handleStopBriefing = () => {
-    stopExecutiveBriefing({ onEnd: () => setIsSpeaking(false) })
+    stopExecutiveBriefing({
+      onEnd: () => {
+        setIsSpeaking(false)
+        setIsAudioLoading(false)
+      },
+    })
   }
 
   return (
@@ -145,13 +172,23 @@ export function ExecutiveReport({
             <button
               type="button"
               onClick={handlePlayBriefing}
-              disabled={!parsed || isLoading || isTranslating || isSpeaking}
-              className="btn-primary !py-2.5"
+              disabled={
+                !parsed ||
+                isLoading ||
+                isTranslating ||
+                isSpeaking ||
+                isAudioLoading
+              }
+              className="btn-primary !py-2.5 min-w-[200px]"
             >
-              <Play className="h-4 w-4" aria-hidden />
-              Play Executive Briefing
+              {isAudioLoading ? (
+                <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+              ) : (
+                <Play className="h-4 w-4" aria-hidden />
+              )}
+              {isAudioLoading ? 'Synthesizing...' : 'Play Executive Briefing'}
             </button>
-            {isSpeaking && (
+            {(isSpeaking || isAudioLoading) && (
               <button
                 type="button"
                 onClick={handleStopBriefing}
