@@ -11,10 +11,10 @@ pages_build_output_dir = "dist"
 BACKEND_API_URL = "http://127.0.0.1:8000"
 
 [env.preview.vars]
-BACKEND_API_URL = "http://66.245.202.165:8000"
+BACKEND_API_URL = "https://ensemble-equation-investing-currently.trycloudflare.com"
 
 [env.production.vars]
-BACKEND_API_URL = "http://66.245.202.165:8000"
+BACKEND_API_URL = "https://ensemble-equation-investing-currently.trycloudflare.com"
 
 # VITE_API_BASE_URL is a *build-time* variable for Vite.
 # Set it in Cloudflare Pages → Settings → Environment variables (Build):
