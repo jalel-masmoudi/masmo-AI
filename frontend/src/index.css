@@ -1,4 +1,27 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
+
+@theme {
+  --color-bg-deep: #020203;
+  --color-bg-base: #050506;
+  --color-bg-elevated: #0a0a0c;
+  --color-surface: rgb(255 255 255 / 0.05);
+  --color-surface-hover: rgb(255 255 255 / 0.08);
+  --color-accent: #5e6ad2;
+  --color-accent-hover: #6b77db;
+  --color-accent-muted: rgb(94 106 210 / 0.15);
+  --color-accent-glow: rgb(94 106 210 / 0.25);
+  --color-foreground: #ededef;
+  --color-muted: #8a8f98;
+  --color-border: rgb(255 255 255 / 0.08);
+  --color-border-strong: rgb(255 255 255 / 0.12);
+  --color-success: #10b981;
+  --color-warning: #f59e0b;
+  --color-danger: #ef4444;
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --radius-panel: 1rem;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+}
 
 html,
 body,
@@ -8,26 +31,175 @@ body,
 
 body {
   margin: 0;
-  background: #020617;
-  color: #e2e8f0;
-  font-family:
-    Inter,
-    ui-sans-serif,
-    system-ui,
-    -apple-system,
-    BlinkMacSystemFont,
-    'Segoe UI',
-    sans-serif;
+  background: var(--color-bg-deep);
+  color: var(--color-foreground);
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
 code {
-  font-family:
-    ui-monospace,
-    SFMono-Regular,
-    Menlo,
-    Monaco,
-    Consolas,
-    monospace;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+.panel {
+  border-radius: var(--radius-panel);
+  border: 1px solid var(--color-border);
+  background: linear-gradient(
+    180deg,
+    rgb(255 255 255 / 0.06) 0%,
+    rgb(255 255 255 / 0.03) 100%
+  );
+  backdrop-filter: blur(12px);
+}
+
+.panel-header {
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: var(--color-muted);
+}
+
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 0.75rem;
+  background: linear-gradient(135deg, #4f46e5 0%, #5e6ad2 100%);
+  padding: 0.75rem 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: white;
+  cursor: pointer;
+  transition: opacity 200ms var(--ease-out), transform 200ms var(--ease-out);
+  box-shadow: 0 0 24px var(--color-accent-glow);
+}
+
+.btn-primary:hover:not(:disabled) {
+  opacity: 0.92;
+  transform: translateY(-1px);
+}
+
+.btn-primary:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 0.75rem;
+  border: 1px solid var(--color-border-strong);
+  background: var(--color-bg-elevated);
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-foreground);
+  cursor: pointer;
+  transition: border-color 200ms var(--ease-out), background 200ms var(--ease-out);
+}
+
+.btn-secondary:hover:not(:disabled) {
+  border-color: rgb(94 106 210 / 0.4);
+  background: var(--color-surface-hover);
+}
+
+.input-field {
+  width: 100%;
+  border-radius: 0.75rem;
+  border: 1px solid var(--color-border);
+  background: var(--color-bg-elevated);
+  padding: 0.875rem 1rem;
+  font-size: 0.9375rem;
+  color: var(--color-foreground);
+  outline: none;
+  transition: border-color 200ms var(--ease-out), box-shadow 200ms var(--ease-out);
+}
+
+.input-field:focus {
+  border-color: rgb(94 106 210 / 0.5);
+  box-shadow: 0 0 0 3px rgb(94 106 210 / 0.15);
+}
+
+.input-field:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  border-radius: 9999px;
+  border: 1px solid var(--color-border);
+  padding: 0.25rem 0.75rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.empty-state {
+  border-radius: 0.75rem;
+  border: 1px dashed var(--color-border);
+  padding: 2rem 1rem;
+  text-align: center;
+  font-size: 0.875rem;
+  color: var(--color-muted);
+}
+
+.grid-bg {
+  background-image:
+    linear-gradient(rgb(255 255 255 / 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(255 255 255 / 0.03) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+
+/* React Flow needs an explicit-height parent; avoid flex content blowout */
+.graph-canvas {
+  isolation: isolate;
+}
+
+.graph-canvas .graph-flow,
+.graph-canvas .react-flow {
+  width: 100%;
+  height: 100%;
+}
+
+.graph-canvas .react-flow__viewport {
+  width: 100%;
+  height: 100%;
+}
+
+.graph-controls.react-flow__controls {
+  border-radius: 0.75rem;
+  border: 1px solid var(--color-border);
+  background: var(--color-bg-elevated);
+  box-shadow: none;
+}
+
+.graph-controls.react-flow__controls button {
+  border-color: var(--color-border);
+  background: var(--color-bg-elevated);
+  fill: var(--color-muted);
+}
+
+.graph-controls.react-flow__controls button:hover {
+  background: var(--color-surface-hover);
 }

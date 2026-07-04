@@ -1,3 +1,13 @@
+import {
+  AlertTriangle,
+  BarChart3,
+  FileText,
+  Loader2,
+  Pause,
+  Play,
+  Sparkles,
+  Target,
+} from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import {
   playExecutiveBriefing,
@@ -14,20 +24,12 @@ interface ExecutiveReportProps {
   visible: boolean
 }
 
-function renderSection(title: string, content: string, accent: string) {
-  if (!content) return null
-
-  return (
-    <section className={`rounded-2xl border ${accent} bg-slate-900/50 p-5`}>
-      <h3 className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
-        {title}
-      </h3>
-      <div className="mt-3 whitespace-pre-wrap text-sm leading-relaxed text-slate-200">
-        {content}
-      </div>
-    </section>
-  )
-}
+const SECTIONS = [
+  { key: 'rootCause' as const, title: 'Root Cause', icon: Target, accent: 'border-danger/25' },
+  { key: 'businessImpact' as const, title: 'Business Impact', icon: BarChart3, accent: 'border-accent/25' },
+  { key: 'evidence' as const, title: 'Key Evidence & Timeline', icon: FileText, accent: 'border-indigo-500/25' },
+  { key: 'recommendations' as const, title: 'Recommendations', icon: Sparkles, accent: 'border-success/25' },
+]
 
 export function ExecutiveReport({
   reportMarkdown,
@@ -104,29 +106,32 @@ export function ExecutiveReport({
   }
 
   return (
-    <section className="rounded-2xl border border-amber-500/20 bg-gradient-to-br from-amber-500/10 via-white/5 to-white/5 p-5 backdrop-blur-sm sm:p-6">
+    <section className="panel relative overflow-hidden p-5 sm:p-6">
+      <div
+        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-accent/50 to-transparent"
+        aria-hidden
+      />
+
       <header className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.35em] text-amber-300">
-            Executive Briefing
-          </p>
-          <h2 className="mt-2 text-2xl font-semibold text-white">
+          <p className="panel-header text-warning">Executive Briefing</p>
+          <h2 className="mt-2 text-xl font-semibold text-foreground sm:text-2xl">
             Investigation Report
           </h2>
-          <p className="mt-2 text-sm text-slate-400">
+          <p className="mt-1.5 text-sm text-muted">
             Structured conclusion for leadership review
           </p>
         </div>
 
         <div className="flex flex-col gap-3 sm:items-end">
-          <label className="flex flex-col gap-1 text-xs text-slate-400">
+          <label className="flex flex-col gap-1.5 text-xs text-muted">
             Briefing language
             <select
               value={language}
               onChange={(event) =>
                 setLanguage(event.target.value as VoiceLanguageCode)
               }
-              className="rounded-xl border border-white/10 bg-slate-900/80 px-3 py-2 text-sm text-slate-100 outline-none focus:border-amber-400/40"
+              className="input-field !py-2 text-sm"
             >
               {VOICE_LANGUAGES.map((option) => (
                 <option key={option.code} value={option.code}>
@@ -141,17 +146,18 @@ export function ExecutiveReport({
               type="button"
               onClick={handlePlayBriefing}
               disabled={!parsed || isLoading || isTranslating || isSpeaking}
-              className="inline-flex items-center gap-2 rounded-xl border border-amber-400/30 bg-amber-400/15 px-4 py-3 text-sm font-semibold text-amber-100 transition hover:bg-amber-400/25 disabled:cursor-not-allowed disabled:opacity-50"
+              className="btn-primary !py-2.5"
             >
-              <span aria-hidden>🎙</span>
+              <Play className="h-4 w-4" aria-hidden />
               Play Executive Briefing
             </button>
             {isSpeaking && (
               <button
                 type="button"
                 onClick={handleStopBriefing}
-                className="rounded-xl border border-white/10 bg-slate-900/80 px-4 py-3 text-sm font-medium text-slate-300 transition hover:bg-slate-800"
+                className="btn-secondary !py-2.5"
               >
+                <Pause className="h-4 w-4" aria-hidden />
                 Stop
               </button>
             )}
@@ -160,51 +166,58 @@ export function ExecutiveReport({
       </header>
 
       {isLoading && (
-        <p className="mt-6 rounded-xl border border-dashed border-white/10 px-4 py-6 text-sm text-slate-500">
-          Generating executive report...
-        </p>
+        <div className="mt-6 flex items-center gap-3 empty-state">
+          <Loader2 className="h-4 w-4 animate-spin text-accent" aria-hidden />
+          Generating executive report…
+        </div>
       )}
 
       {isTranslating && (
-        <p className="mt-6 rounded-xl border border-dashed border-amber-500/20 px-4 py-4 text-sm text-amber-200/80">
-          Translating report via Gradium multilingual pipeline...
+        <p
+          aria-live="polite"
+          className="mt-6 flex items-center gap-2 rounded-xl border border-warning/25 bg-warning/10 px-4 py-3 text-sm text-amber-200"
+        >
+          <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+          Translating report via Gradium multilingual pipeline…
         </p>
       )}
 
       {(error || translationError) && (
-        <p className="mt-6 rounded-xl border border-rose-500/20 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">
+        <p
+          role="alert"
+          className="mt-6 flex items-start gap-2 rounded-xl border border-danger/30 bg-danger/10 px-4 py-3 text-sm text-red-200"
+        >
+          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
           {error || translationError}
         </p>
       )}
 
       {parsed && !isLoading && (
-        <div className="mt-6 space-y-4">
-          {renderSection(
-            'Root Cause',
-            parsed.rootCause,
-            'border-rose-500/20',
-          )}
-          {renderSection(
-            'Business Impact',
-            parsed.businessImpact,
-            'border-sky-500/20',
-          )}
-          {renderSection(
-            'Key Evidence & Timeline',
-            parsed.evidence,
-            'border-violet-500/20',
-          )}
-          {renderSection(
-            'Recommendations',
-            parsed.recommendations,
-            'border-emerald-500/20',
-          )}
+        <div className="mt-6 grid gap-4 lg:grid-cols-2">
+          {SECTIONS.map(({ key, title, icon: Icon, accent }) => {
+            const content = parsed[key]
+            if (!content) return null
+
+            return (
+              <section
+                key={key}
+                className={`rounded-xl border ${accent} bg-bg-elevated/60 p-5 lg:last:odd:col-span-2`}
+              >
+                <h3 className="flex items-center gap-2 panel-header !tracking-[0.15em]">
+                  <Icon className="h-3.5 w-3.5" aria-hidden />
+                  {title}
+                </h3>
+                <div className="mt-3 whitespace-pre-wrap text-sm leading-relaxed text-foreground/90">
+                  {content}
+                </div>
+              </section>
+            )
+          })}
+
           {(confidence || parsed.confidence) && (
-            <div className="rounded-2xl border border-amber-500/20 bg-amber-500/5 px-5 py-4">
-              <h3 className="text-xs font-semibold uppercase tracking-[0.2em] text-amber-300">
-                Confidence Score
-              </h3>
-              <p className="mt-2 text-sm text-slate-200">
+            <div className="rounded-xl border border-warning/25 bg-warning/5 p-5 lg:col-span-2">
+              <h3 className="panel-header text-warning">Confidence Score</h3>
+              <p className="mt-2 text-sm text-foreground/90">
                 {confidence || parsed.confidence}
               </p>
             </div>

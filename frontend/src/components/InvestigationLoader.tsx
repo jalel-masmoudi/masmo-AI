@@ -1,3 +1,4 @@
+import { BrainCircuit, Loader2, Search } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import type { InvestigationStep } from '../types/investigation'
 
@@ -14,6 +15,8 @@ const ACTION_LABELS: Record<string, string> = {
   observe: 'Analyzing evidence and updating graph…',
   report: 'Generating executive report…',
 }
+
+const PHASES = ['Plan', 'Execute', 'Observe', 'Report'] as const
 
 interface InvestigationLoaderProps {
   active: boolean
@@ -75,64 +78,75 @@ export function InvestigationLoader({
   if (!active || !visible) return null
 
   return (
-    <div className="absolute inset-0 z-20 flex items-center justify-center rounded-2xl bg-slate-950/75 p-6 backdrop-blur-md">
-      <div className="w-full max-w-lg rounded-2xl border border-sky-500/20 bg-slate-900/90 p-8 shadow-2xl shadow-sky-950/30">
+    <div
+      className="absolute inset-0 z-20 flex items-center justify-center rounded-[var(--radius-panel)] bg-bg-deep/80 p-6 backdrop-blur-md"
+      role="status"
+      aria-live="polite"
+      aria-label="Investigation in progress"
+    >
+      <div className="panel w-full max-w-md p-8 shadow-[0_0_48px_var(--color-accent-glow)]">
         <div className="flex flex-col items-center text-center">
-          <div className="relative mb-6 h-16 w-16">
-            <span className="absolute inset-0 animate-ping rounded-full bg-sky-500/20" />
-            <span className="absolute inset-2 animate-spin rounded-full border-2 border-sky-500/20 border-t-sky-400" />
-            <span className="absolute inset-0 flex items-center justify-center text-lg">
-              🔍
-            </span>
+          <div className="relative mb-6 flex h-16 w-16 items-center justify-center">
+            <span className="absolute inset-0 rounded-full bg-accent/10" />
+            <span className="absolute inset-0 animate-ping rounded-full bg-accent/15" />
+            <BrainCircuit className="relative h-8 w-8 text-accent" aria-hidden />
           </div>
 
-          <p className="text-xs font-semibold uppercase tracking-[0.35em] text-sky-400">
-            Investigation in progress
-          </p>
-          <h3 className="mt-3 text-xl font-semibold text-white">
+          <p className="panel-header text-accent">Investigation in progress</p>
+          <h3 className="mt-2 text-lg font-semibold text-foreground">
             Analyzing your question
           </h3>
-          <p className="mt-2 line-clamp-2 text-sm text-slate-400">
+          <p className="mt-2 line-clamp-2 text-sm text-muted">
             &ldquo;{query}&rdquo;
           </p>
 
-          <p className="mt-6 min-h-[1.5rem] text-sm font-medium text-sky-200 transition-opacity duration-300">
+          <p className="mt-5 flex min-h-[1.5rem] items-center justify-center gap-2 text-sm font-medium text-foreground/90">
+            {steps.length === 0 && (
+              <Loader2 className="h-3.5 w-3.5 animate-spin text-accent" aria-hidden />
+            )}
             {statusMessage}
           </p>
 
           <div className="mt-6 w-full">
-            <div className="mb-2 flex items-center justify-between text-xs text-slate-500">
+            <div className="mb-2 flex items-center justify-between text-xs text-muted">
               <span>Agent progress</span>
-              <span>{steps.length > 0 ? `${progress}%` : 'Starting…'}</span>
+              <span className="tabular-nums">
+                {steps.length > 0 ? `${progress}%` : 'Starting…'}
+              </span>
             </div>
-            <div className="h-2 overflow-hidden rounded-full bg-slate-800">
+            <div className="h-1.5 overflow-hidden rounded-full bg-bg-elevated">
               <div
-                className={`h-full rounded-full bg-gradient-to-r from-sky-500 to-cyan-400 transition-all duration-500 ${
+                className={`h-full rounded-full bg-gradient-to-r from-indigo-600 to-accent transition-all duration-500 ${
                   steps.length === 0 ? 'w-1/3 animate-pulse' : ''
                 }`}
-                style={steps.length > 0 ? { width: `${Math.max(progress, 8)}%` } : undefined}
+                style={
+                  steps.length > 0
+                    ? { width: `${Math.max(progress, 8)}%` }
+                    : undefined
+                }
               />
             </div>
           </div>
 
           <div className="mt-6 flex flex-wrap justify-center gap-2">
-            {['Plan', 'Execute', 'Observe', 'Report'].map((phase) => {
+            {PHASES.map((phase) => {
+              const phaseKey = phase.toLowerCase()
               const isActive =
-                latestStep?.action === phase.toLowerCase() ||
+                latestStep?.action === phaseKey ||
                 (phase === 'Plan' && steps.length === 0)
               const isDone =
-                steps.some((step) => step.action === phase.toLowerCase()) &&
-                latestStep?.action !== phase.toLowerCase()
+                steps.some((step) => step.action === phaseKey) &&
+                latestStep?.action !== phaseKey
 
               return (
                 <span
                   key={phase}
-                  className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
+                  className={`badge transition-colors duration-200 ${
                     isActive
-                      ? 'border-sky-400/40 bg-sky-500/15 text-sky-200'
+                      ? 'border-accent/40 bg-accent-muted text-accent'
                       : isDone
-                        ? 'border-emerald-500/20 bg-emerald-500/10 text-emerald-300'
-                        : 'border-white/10 bg-slate-800/80 text-slate-500'
+                        ? 'border-success/30 bg-success/10 text-emerald-400'
+                        : 'border-border bg-bg-elevated text-muted'
                   }`}
                 >
                   {phase}
@@ -140,6 +154,11 @@ export function InvestigationLoader({
               )
             })}
           </div>
+
+          <p className="mt-5 flex items-center gap-1.5 text-xs text-muted">
+            <Search className="h-3 w-3" aria-hidden />
+            Multi-agent workflow active
+          </p>
         </div>
       </div>
     </div>

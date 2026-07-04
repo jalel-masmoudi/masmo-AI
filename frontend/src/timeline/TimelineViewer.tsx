@@ -1,3 +1,12 @@
+import {
+  ClipboardList,
+  Eye,
+  FileText,
+  Radio,
+  Zap,
+} from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
+import { INVESTIGATION_WORKSPACE_HEIGHT } from '../constants/layout'
 import type { InvestigationStep } from '../types/investigation'
 
 interface TimelineViewerProps {
@@ -7,27 +16,31 @@ interface TimelineViewerProps {
 
 const actionMeta: Record<
   string,
-  { label: string; color: string; dot: string }
+  { label: string; color: string; icon: LucideIcon; border: string }
 > = {
   plan: {
     label: 'Plan',
-    color: 'text-sky-300',
-    dot: 'bg-sky-400',
+    color: 'text-accent',
+    icon: ClipboardList,
+    border: 'border-accent/20',
   },
   execute: {
     label: 'Execute',
-    color: 'text-violet-300',
-    dot: 'bg-violet-400',
+    color: 'text-indigo-300',
+    icon: Zap,
+    border: 'border-indigo-500/20',
   },
   observe: {
     label: 'Observe',
-    color: 'text-emerald-300',
-    dot: 'bg-emerald-400',
+    color: 'text-emerald-400',
+    icon: Eye,
+    border: 'border-success/20',
   },
   report: {
     label: 'Report',
     color: 'text-amber-300',
-    dot: 'bg-amber-400',
+    icon: FileText,
+    border: 'border-warning/20',
   },
 }
 
@@ -68,64 +81,73 @@ function formatStepDetail(step: InvestigationStep): string | null {
 
 export function TimelineViewer({ steps, isRunning }: TimelineViewerProps) {
   return (
-    <section className="flex h-full flex-col rounded-2xl border border-white/10 bg-white/5 p-5 backdrop-blur-sm">
-      <header className="mb-4 flex items-center justify-between">
-        <div>
-          <h2 className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-400">
-            Investigation Timeline
-          </h2>
-          <p className="mt-1 text-sm text-slate-500">
-            Agent reasoning steps in real time
+    <section className="panel flex flex-col p-4 sm:p-5">
+      <header className="mb-3 flex shrink-0 items-center justify-between gap-2">
+        <div className="min-w-0">
+          <h2 className="panel-header">Timeline</h2>
+          <p className="mt-0.5 truncate text-xs text-muted">
+            Agent steps
+            {steps.length > 0 && (
+              <span className="ml-1 tabular-nums">· {steps.length}</span>
+            )}
           </p>
         </div>
         {isRunning && (
-          <span className="inline-flex items-center gap-2 rounded-full border border-sky-500/30 bg-sky-500/10 px-3 py-1 text-xs font-medium text-sky-300">
-            <span className="h-2 w-2 animate-pulse rounded-full bg-sky-400" />
+          <span className="badge border-accent/30 bg-accent-muted text-accent">
+            <Radio className="h-3 w-3 animate-pulse" aria-hidden />
             Live
           </span>
         )}
       </header>
 
-      <div className="min-h-0 flex-1 space-y-3 overflow-y-auto pr-1">
+      <div
+        className="min-h-0 shrink-0 space-y-1.5 overflow-y-auto pr-0.5"
+        style={{ height: INVESTIGATION_WORKSPACE_HEIGHT }}
+      >
         {steps.length === 0 ? (
-          <div className="rounded-xl border border-dashed border-white/10 px-4 py-8 text-center text-sm text-slate-500">
-            Start an investigation to see the agent plan, execute tools, and observe
-            evidence.
+          <div className="empty-state !py-8 text-xs">
+            Steps appear here as the agent investigates.
           </div>
         ) : (
           steps.map((step, index) => {
             const meta = actionMeta[step.action ?? ''] ?? {
               label: 'Step',
-              color: 'text-slate-300',
-              dot: 'bg-slate-400',
+              color: 'text-muted',
+              icon: ClipboardList,
+              border: 'border-border',
             }
             const detail = formatStepDetail(step)
+            const Icon = meta.icon
 
             return (
               <article
                 key={`${step.step ?? index}-${step.action}-${step.tool ?? index}`}
-                className="relative rounded-xl border border-white/8 bg-slate-900/70 p-4"
+                className={`rounded-lg border ${meta.border} bg-bg-elevated/80 px-3 py-2.5`}
               >
-                <div className="flex items-start gap-3">
-                  <span
-                    className={`mt-1 h-2.5 w-2.5 shrink-0 rounded-full ${meta.dot}`}
-                  />
+                <div className="flex items-start gap-2.5">
+                  <div
+                    className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-md border ${meta.border} bg-bg-deep`}
+                  >
+                    <Icon className={`h-3 w-3 ${meta.color}`} aria-hidden />
+                  </div>
                   <div className="min-w-0 flex-1">
-                    <div className="flex flex-wrap items-center gap-2">
+                    <div className="flex items-center gap-1.5">
                       <span
-                        className={`text-xs font-semibold uppercase tracking-wide ${meta.color}`}
+                        className={`text-[10px] font-semibold uppercase tracking-wide ${meta.color}`}
                       >
                         {meta.label}
                       </span>
                       {step.step !== undefined && (
-                        <span className="text-xs text-slate-600">#{step.step}</span>
+                        <span className="text-[10px] tabular-nums text-muted">
+                          #{step.step}
+                        </span>
                       )}
                     </div>
-                    <h3 className="mt-1 text-sm font-medium text-slate-100">
+                    <h3 className="mt-0.5 line-clamp-2 text-xs font-medium leading-snug text-foreground">
                       {formatStepTitle(step)}
                     </h3>
                     {detail && (
-                      <p className="mt-2 text-sm leading-relaxed text-slate-400">
+                      <p className="mt-1 line-clamp-2 text-[11px] leading-relaxed text-muted">
                         {detail}
                       </p>
                     )}
