@@ -10,13 +10,13 @@ It does not just answer questions like a chatbot. Masmo behaves like a Senior Op
 
 ---
 
-## 🌟 The Core Problem
+## The Core Problem
 
 When a major enterprise initiative is delayed or a system goes down, finding the root cause requires human analysts to manually connect dots across Jira, Slack, PagerDuty, and Confluence. 
 
 Current AI tools (like standard RAG chatbots) fail here because they answer questions directly based on simple semantic search. They do not **investigate**, **reason across multiple steps**, or **understand the topological dependencies** of an enterprise.
 
-## 🚀 The Masmo Solution
+## The Masmo Solution
 
 Masmo introduces an event-driven **Investigation Agent Workflow**:
 
@@ -38,7 +38,7 @@ Masmo introduces an event-driven **Investigation Agent Workflow**:
 
 ---
 
-## 🏗️ Technical Architecture
+## Technical Architecture
 
 ### 1. Agent Runtime & Reasoning
 - **Framework:** LangGraph (Stateful, cyclic multi-agent graph).
@@ -59,7 +59,7 @@ Masmo introduces an event-driven **Investigation Agent Workflow**:
 
 ---
 
-## ⚙️ How to Run Locally
+## How to Run Locally
 
 ### Backend
 ```bash
@@ -142,7 +142,7 @@ npm run deploy:pages
 
 ---
 
-## 🏆 Why Masmo wins the Vultr Track
+## Why Masmo wins the Vultr Track
 
 1. **Multi-Step Reasoning:** We go beyond single-shot LLM calls. Masmo exhibits true agentic planning and tool use over multiple state iterations.
 2. **High-Performance Inference:** Powered by Vultr's robust AI endpoints, allowing for rapid loop execution in LangGraph.

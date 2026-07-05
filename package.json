@@ -1,0 +1,12 @@
+{
+  "name": "masmo-ai",
+  "version": "1.0.0",
+  "description": "**Hackathon:** RAISE Summit Hackathon 2026  \r **Track:** Vultr (Enterprise Agent)  \r **Bonus Integrations:** Gradium, OpenRouter, Cloudflare",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
